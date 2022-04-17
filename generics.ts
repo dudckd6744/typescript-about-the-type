@@ -102,6 +102,48 @@ type MyType3<T> =
 
 const umme:MyType3<string> = 'Str'
 
-//공변성 반공변성에 대해서
-// https://iamssen.medium.com/typescript-%EC%97%90%EC%84%9C%EC%9D%98-%EA%B3%B5%EB%B3%80%EC%84%B1%EA%B3%BC-%EB%B0%98%EA%B3%B5%EB%B3%80%EC%84%B1-strictfunctiontypes-a82400e67f2
+// NOTE: infer
+//       해당 키워드를 사용해 타입 변수의 타입 추론 여부를 확인할 수 있습니다.
+
+// U 가 추론가능한 타입이면 참, 아니면 거짓
+type eg<T> = T extends infer U ? true : false
+
+// 예제
+type MyType4<T> = T extends infer R ? R : null;
+
+const b: MyType4<number> = 123;
+/* 
+여기서 타입변수 R 은 MyType4<number> 에서 받은 타입 number 가 되고 infer 키워드를 통해 타입 추론이 가능한지 확인합니다.
+number 타입은 당연히 타입 추론이 가능하니 R 을 반환하게 됩니다.(만약 R을 타입 추론할 수 없다면 null 이 반환됩니다.)
+결과적으로 MyType4<number>는 number 를 반환하고 b 는 123을 할당할 수 있습니다.
+*/
+
+// NOTE: 이번엔 조금 복잡하지만 유용한 예제를 살펴보자
+//       RetrunType 은 함수의 반환 값이 어떤 타입인지 반환합니다.
+
+type ReturnTypeA<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+
+function fn(num: number) {
+  return num.toString();
+}
+
+const a: ReturnTypeA<typeof fn> = 'Hello';
+
+/*
+typeof fn 의 반환 타입은 string 이빈다.
+따라서 R 은 string 이고 역시 infer 키워드를 통해서 타입 추론이 가능하기 때문에 R을 반환합니다.
+즉 string을 반환합니다.
+
+infer 키워드에 대한 더 자세한 내용은 공식 문서 https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-inference-in-conditional-types 를 참고하자.
+문서 내용을 간단히 정리하자면 ,,,
+- infer 키워드는 제약조건 extends 가 아닌 조건부 타입 extends 에서만 가능
+- infer 키워드는 같은 타입 변수를 여러 위치에서 사용가능
+    - 일반적인 공변성 위치에선 유니언타입으로 추론
+    - 함수 인수인 반공변성 위치에선 인터섹션 타입으로 추론
+- 여러 호출 시그니처의 경우 마지막 시그니처에서 추론
+
+공변성 반공변성에 대해서
+https://iamssen.medium.com/typescript-%EC%97%90%EC%84%9C%EC%9D%98-%EA%B3%B5%EB%B3%80%EC%84%B1%EA%B3%BC-%EB%B0%98%EA%B3%B5%EB%B3%80%EC%84%B1-strictfunctiontypes-a82400e67f2
+*/
+
 /* --------------------------------------------------------------------------------------------------------------------------------------------  */
