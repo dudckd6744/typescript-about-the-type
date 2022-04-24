@@ -35,7 +35,7 @@ const testCase2 : OptionsFlags<typeof testet>= {qWE:true,rqwe:true}
 
 // 유형의 속성에서 '읽기 전용' 속성을 제거
 type CreateMutable<Type> = {
-    -readonly [Property in keyof Type]: Type[Property];
+    -readonly [property in keyof Type]: Type[property];
   };
    
 interface LockedAccount {
@@ -57,3 +57,40 @@ interface MaybeUser {
 };
 
 type User = Concrete<MaybeUser>;
+
+// NOTE: as를 이용하여 키 재매핑!!
+
+type ItessCase2 = 'email'|'pw'
+
+type MappedTypeWithNewProperties<Type> = {
+    [Properties in keyof Type as ItessCase2]: Type[Properties]
+}
+
+const testCase3 :MappedTypeWithNewProperties<MaybeUser> = {pw:1, email:2} 
+
+// 템플릿 리터럴 유형 과 같은 기능을 활용 하여 이전 속성에서 새 속성 이름을 만들 수 있습니다.
+
+type Getters<Type> = {
+    [Property in keyof Type as `ds${Capitalize<string & Property>}`]: () => Type[Property]
+};
+ 
+interface PersonAV {
+    nme: string;
+    age: number;
+    location: string;
+}
+ 
+type LazyPerson = Getters<PersonAV>;
+
+// 조건부 유형을 통해 never를 생성하여 키를 필터링할 수 있습니다.
+
+type RemoveKindField<Type> = {
+    [Property in keyof Type as Exclude<Property, "kind">]: Type[Property]
+};
+ 
+interface Circle {
+    kind: "circle";
+    radius: number;
+}
+ 
+type KindlessCircle = RemoveKindField<Circle>;
